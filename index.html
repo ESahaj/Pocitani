@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<title>Početní operace s desetinnými čísly</title>
+<style>
+body { 
+    font-family: Arial, sans-serif; 
+    text-align: center; 
+    padding: 20px; 
+}
+
+h1 {
+    margin-bottom: 50px;
+}
+
+.container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 50px;
+}
+
+#priklad {
+    font-size: 50px;
+}
+
+#odpoved {
+    width: 120px;
+    height: 50px;
+    font-size: 2rem;
+    text-align: center;
+    border: 2px solid #000;
+    padding: 5px;
+    transition: background-color 0.3s;
+}
+
+.klavesnice {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 50px;
+}
+
+.klavesnice button {
+    font-size: 1.5rem;
+    padding: 15px 20px;
+    margin: 5px;
+    cursor: pointer;
+    flex: 1 1 60px;
+    min-width: 50px;
+}
+
+button#zkontrolovat, button#dalsi {
+    margin-top: 10px;
+    font-size: 1.2rem;
+    padding: 10px 20px;
+}
+
+@media (max-width: 500px) {
+    #priklad { font-size: 35px; }
+    #odpoved { width: 80%; font-size: 1.5rem; }
+    .klavesnice button { font-size: 1.2rem; padding: 12px 15px; }
+}
+</style>
+</head>
+<body>
+
+<h1>Početní operace s desetinnými čísly</h1>
+
+<div class="container">
+    <div id="priklad"></div>
+    <input type="text" id="odpoved" readonly>
+</div>
+
+<div class="klavesnice" id="klavesnice"></div>
+
+<button id="zkontrolovat" onclick="zkontrolovat()">Zkontrolovat</button>
+<button id="dalsi" onclick="dalsiPriklad()">Další příklad</button>
+
+<script>
+// --- Seznam příkladů ---
+const vsechnyPriklady = [
+    { text: "(-0,2) - (-0,5)", vysledek: 0.3 },
+    { text: "5,5 + 2,1", vysledek: 7.6 },
+    { text: "3 × (-0,5)", vysledek: -1.5 },
+    { text: "7 ÷ 2", vysledek: 3.5 },
+    { text: "10 - 4,5", vysledek: 5.5 },
+    { text: "(-1,2) + 3", vysledek: 1.8 },
+    { text: "-0,8 ÷ (-4)", vysledek: 0.2 },
+    { text: "0,25 × (-4)", vysledek: -1 },
+    { text: "(-4,5) - (-0,01)", vysledek: -4.49 },
+    { text: "3,3 - (-1,01)", vysledek: 4.31 },
+    { text: "-1,2 ÷ 3", vysledek: -0.4 },
+    { text: "(-2) × 0,3", vysledek: -0.6 },
+    { text: "(-0,7) + 1,2", vysledek: 0.5 },
+    { text: "2,5 - (-1,5)", vysledek: 4.0 },
+    { text: "-3,4 + (-1,6)", vysledek: -5.0 },
+    { text: "5 × 0,2", vysledek: 1.0 },
+    { text: "0,75 ÷ 0,25", vysledek: 3.0 },
+    { text: "-2 ÷ 0,5", vysledek: -4.0 },
+    { text: "3,3 + (-2,8)", vysledek: 0.5 },
+    { text: "-1,5 × (-2)", vysledek: 3.0 },
+    { text: "4 ÷ (-2)", vysledek: -2.0 },
+    { text: "-0,9 + 0,4", vysledek: -0.5 },
+    { text: "2,5 × 1,2", vysledek: 3.0 },
+    { text: "-3,6 ÷ 1,2", vysledek: -3.0 },
+    { text: "0,6 - (-0,4)", vysledek: 1.0 },
+    { text: "-2,1 + (-0,9)", vysledek: -3.0 },
+    { text: "5,5 ÷ 2", vysledek: 2.75 },
+    { text: "-0,8 × (-3,5)", vysledek: 2.8 },
+    { text: "1,2 + (-0,7)", vysledek: 0.5 },
+    { text: "-4 + 5,5", vysledek: 1.5 },
+    { text: "3,6 ÷ (-1,2)", vysledek: -3.0 },
+    { text: "-1,5 - (-0,5)", vysledek: -1.0 }
+];
+
+// --- Funkce pro 10 náhodných příkladů ---
+function vyberNahodnePriklady(pocet) {
+    const prikladyCopy = [...vsechnyPriklady];
+    const nahodne = [];
+    while (nahodne.length < pocet && prikladyCopy.length > 0) {
+        const i = Math.floor(Math.random() * prikladyCopy.length);
+        nahodne.push(prikladyCopy.splice(i, 1)[0]);
+    }
+    return nahodne;
+}
+
+let priklady = vyberNahodnePriklady(10);
+let index = 0;
+let odpovedSpravna = false; // ← deklarace nahoře, mimo funkce
+
+// Zobrazí příklad a vytvoří klávesnici
+function zobrazPriklad() {
+    if (index >= priklady.length) {
+        document.getElementById('priklad').innerHTML = "Hotovo! Žádné další příklady.";
+        document.getElementById('odpoved').value = '';
+        document.getElementById('klavesnice').innerHTML = '';
+        return;
+    }
+
+    const odpovedInput = document.getElementById('odpoved');
+    odpovedInput.value = '';
+    odpovedInput.style.backgroundColor = '#fff';
+    document.getElementById('priklad').innerHTML = priklady[index].text;
+
+    const klavesnice = document.getElementById('klavesnice');
+    klavesnice.innerHTML = '';
+    const tlacitka = ['-','0','1','2','3','4','5','6','7','8','9',',','C'];
+    tlacitka.forEach(t => {
+        const btn = document.createElement('button');
+        btn.textContent = t;
+        btn.onclick = () => {
+            if(t === 'C') {
+                odpovedInput.value = '';
+            } else {
+                odpovedInput.value += t;
+            }
+        };
+        klavesnice.appendChild(btn);
+    });
+}
+
+// Kontrola odpovědi
+function zkontrolovat() {
+    const odpovedInput = document.getElementById('odpoved');
+    let odpoved = parseFloat(odpovedInput.value.replace(',', '.'));
+    let spravny = priklady[index].vysledek;
+
+    if (!isNaN(odpoved) && Math.abs(odpoved - spravny) < 0.01) {
+        odpovedInput.style.backgroundColor = '#c8e6c9'; // zelená
+        odpovedSpravna = true;
+    } else {
+        odpovedInput.style.backgroundColor = '#ffcdd2'; // červená
+        odpovedSpravna = false;
+    }
+}
+
+// Další příklad – načte se jen po správné odpovědi
+function dalsiPriklad() {
+    if (!odpovedSpravna) return; // nic se nestane, dokud není odpověď správná
+    index++;
+    odpovedSpravna = false;
+    zobrazPriklad();
+}
+
+// Inicializace prvního příkladu
+zobrazPriklad();
+</script>
+
+</body>
+</html>
